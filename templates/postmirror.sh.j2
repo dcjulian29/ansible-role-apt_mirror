@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+
+cd {{ apt_mirror_dir }}/mirror
+
+find . -maxdepth 1 -type l -delete
+
+for i in $(ls -d *); do
+  for j in $(ls -d ${i%%}/*); do
+    echo "${j##*/} ==> ${i%%}/${j##*/}"
+    ln -s ${i%%}/${j##*/} ${j##*/}
+  done
+done

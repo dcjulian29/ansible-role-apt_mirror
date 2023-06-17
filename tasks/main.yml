@@ -1,0 +1,102 @@
+---
+- name: Download forked apt-mirror script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/Stifler6996/apt-mirror/master/apt-mirror
+    dest: /usr/bin/apt-mirror
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure mirror update is scheduled
+  ansible.builtin.cron:
+    name: "APT Mirror Update"
+    day: "{{ apt_mirror_day | default('*') }}"
+    hour: "{{ apt_mirror_hour }}"
+    job: /usr/bin/apt-mirror >> /var/spool/apt-mirror/var/cron-update.log
+    minute: "{{ apt_mirror_minute | default('0') }}"
+    month: "{{ apt_mirror_month | default('*') }}"
+    user: root
+    weekday: "{{ apt_mirror_weekday | default('*') }}"
+
+- name: Ensure mirror clean is scheduled
+  ansible.builtin.cron:
+    name: "APT Mirror Clean"
+    day: "{{ apt_mirror_day | default('*') }}"
+    hour: "{{ apt_mirror_clean_hour }}"
+    job: /var/spool/apt-mirror/var/clean.sh >> /var/spool/apt-mirror/var/cron-clean.log
+    minute: "{{ apt_mirror_minute | default('0') }}"
+    month: "{{ apt_mirror_month | default('*') }}"
+    user: root
+    weekday: "{{ apt_mirror_weekday | default('*') }}"
+
+- name: Ensure mirror.list file exists
+  ansible.builtin.file:
+    path: /etc/apt/mirror.list
+    access_time: preserve
+    modification_time: preserve
+    owner: root
+    group: root
+    mode: "0644"
+    state: touch
+
+- name: Ensure mirror.list file is configured appropriately
+  ansible.builtin.template:
+    dest: /etc/apt/mirror.list
+    src: mirror.list.j2
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Run apt-mirror
+
+- name: Ensure apt-mirror base directory exist
+  ansible.builtin.file:
+    path: "{{ apt_mirror_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure apt-mirror working directories exist
+  ansible.builtin.file:
+    path: "{{ apt_mirror_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  with_items:
+    - mirror
+    - skel
+    - var
+
+- name: Ensure post mirror script is present
+  ansible.builtin.template:
+    dest: '{{ apt_mirror_dir }}/var/postmirror.sh'
+    src: postmirror.sh.j2
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Make sure Apache is installed
+  ansible.builtin.apt:
+    name: apache2
+    state: present
+
+- name: Ensure Apache is set to start at boot time
+  ansible.builtin.service:
+    name: apache2
+    enabled: true
+
+- name: Ensure Apache configured to serve mirrors
+  ansible.builtin.template:
+    dest: /etc/apache2/sites-enabled/apt-mirror.conf
+    src: apt-mirror.conf.j2
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Apache
+
+- name: Remove default site
+  ansible.builtin.file:
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  notify: Restart Apache

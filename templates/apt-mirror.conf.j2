@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+
+<VirtualHost *:80>
+    DocumentRoot {{ apt_mirror_dir }}/mirror
+
+    <Directory {{ apt_mirror_dir }}/mirror>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+        Require all granted
+    </Directory>
+
+    LogLevel warn
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

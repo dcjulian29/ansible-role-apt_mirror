@@ -1,0 +1,10 @@
+---
+apt_mirror: []
+#  - deb http://archive.ubuntu.com/ubuntu focal main restricted universe multiverse
+apt_mirror_clean: []
+#  - http://archive.ubuntu.com/ubuntu
+apt_mirror_clean_hour: 6
+apt_mirror_hour: 3
+apt_mirror_dir: /var/spool/apt-mirror
+apt_mirror_run: true
+apt_mirror_threads: 20

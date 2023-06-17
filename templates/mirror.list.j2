@@ -1,0 +1,24 @@
+{{ ansible_managed | comment }}
+
+############# config ##################
+
+set base_path           {{ apt_mirror_dir }}
+
+set mirror_path         $base_path/mirror
+set skel_path           $base_path/skel
+set var_path            $base_path/var
+set cleanscript         $var_path/clean.sh
+set postmirror_script   $var_path/postmirror.sh
+set run_postmirror      1
+set nthreads            {{ apt_mirror_threads }}
+set _tilde              0
+
+############# end config ##############
+
+{% for item in apt_mirror %}
+{{ item }}
+{%   endfor %}
+
+{% for item in apt_mirror_clean %}
+clean {{ item }}
+{% endfor %}

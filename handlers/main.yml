@@ -1,0 +1,9 @@
+---
+- name: Run apt-mirror
+  ansible.builtin.command: nohup sudo apt-mirror &
+  when: apt_mirror_run
+
+- name: Restart Apache
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
