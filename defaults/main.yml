@@ -4,7 +4,11 @@ apt_mirror: []
 apt_mirror_clean: []
 #  - http://archive.ubuntu.com/ubuntu
 apt_mirror_clean_hour: 6
-apt_mirror_hour: 3
 apt_mirror_dir: /var/spool/apt-mirror
+apt_mirror_fqdn: "{{ ansible_hostname }}"
+apt_mirror_https: false
+apt_mirror_hour: 3
 apt_mirror_run: true
 apt_mirror_threads: 20
+apt_mirror_tls_cert_file: /etc/ssl/certs/ssl-cert-snakeoil.pem
+apt_mirror_tls_key_file: /etc/ssl/private/ssl-cert-snakeoil.key

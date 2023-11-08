@@ -86,7 +86,19 @@
     name: apache2
     enabled: true
 
-- name: Ensure Apache configured to serve mirrors
+- name: Ensure ssl-cert package is installed if needed
+  ansible.builtin.package:
+    name: ssl-cert
+    state: present
+  when: apt_mirror_https
+
+- name: Enable Apache ssl module
+  community.general.apache2_module:
+    name: ssl
+    state: present
+  when: apt_mirror_https
+
+- name: Ensure Apache is configured to serve mirrors
   ansible.builtin.template:
     dest: /etc/apache2/sites-enabled/apt-mirror.conf
     src: apt-mirror.conf.j2

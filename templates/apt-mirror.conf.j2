@@ -15,3 +15,30 @@
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
+
+{% if apt_mirror_https %}
+<VirtualHost *:443>
+
+    DocumentRoot {{ apt_mirror_dir }}/mirror
+
+    <Directory {{ apt_mirror_dir }}/mirror>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+        Require all granted
+    </Directory>
+
+    LogLevel warn
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
+    SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+    SSLHonorCipherOrder On
+
+    SSLEngine on
+    SSLCertificateFile {{ apt_mirror_tls_cert_file }}
+    SSLCertificateKeyFile {{ apt_mirror_tls_key_file }}
+</VirtualHost>
+{% endif %}
